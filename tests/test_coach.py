@@ -1,9 +1,10 @@
 import pytest
 
 from chessgame.analysis import analyse, review_game
-from chessgame.board import Board, Move
+from chessgame.board import Board, Move, square
 from chessgame.coach import chance, explain, reason, suggestion
 from chessgame.game import Game
+from chessgame.notation import parse_move
 from chessgame.openings import get_book
 
 
@@ -29,6 +30,18 @@ def test_reasons(fen, uci, expected):
 
 def test_promotion_reason():
     assert why("8/4P3/8/8/8/8/k7/4K3 w - - 0 1", "e7e8q") == "promotes a pawn to a queen"
+
+
+def test_taking_back_in_a_trade_is_a_recapture_not_a_free_piece():
+    board = Board()
+    for text in ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qe5", "Qe2", "Qxe2"]:
+        board.make(parse_move(board, text))
+    bxe2 = parse_move(board, "Bxe2")
+    assert reason(board, bxe2) == "recaptures the queen"  # it knows from the board's history
+    fresh = Board(board.fen())  # no history, so it has to be told where the last capture was
+    assert reason(fresh, bxe2) == "wins the queen for free"
+    assert reason(fresh, bxe2, last_capture=square("e2")) == "recaptures the queen"
+    assert review_of("e4 d5 exd5 Qxd5 Nc3 Qe5 Qe2 Qxe2 Bxe2", 8).last_capture == square("e2")
 
 
 def test_moving_out_of_danger():

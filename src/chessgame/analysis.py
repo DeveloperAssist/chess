@@ -124,6 +124,7 @@ class MoveReview:
     reply_san: str
     fen_before: str
     fen_after: str
+    last_capture: int | None = None  # where the opponent's previous move captured, if it did
 
     @property
     def accuracy(self) -> float:
@@ -189,8 +190,12 @@ def review_move(game: Game, ply: int, cache: AnalysisCache, levels=(ANALYSIS, RE
     best_san = san(board, before.best) if before.best else ""
     reply = after.best if after else None
     reply_san = san(Board(fen_after), reply) if reply else ""
+    last_capture = None
+    if ply > 0 and "x" in game.sans[ply - 1]:
+        last_capture = game.moves[ply - 1].end
     return MoveReview(ply, board.turn, move, game.sans[ply], kind, loss, before.best, best_san,
-                      before.score, played_score, reply, reply_san, fen_before, fen_after)  # fmt: skip
+                      before.score, played_score, reply, reply_san, fen_before, fen_after,
+                      last_capture)  # fmt: skip
 
 
 def build_reviews(game: Game, cache: AnalysisCache, levels=(ANALYSIS, REPLY)) -> list[MoveReview | None]:
