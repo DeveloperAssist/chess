@@ -21,6 +21,9 @@ def _game_options(parser: argparse.ArgumentParser) -> None:
         "--level", choices=("easy", "medium", "hard"), default="medium", help="the computer's level"
     )
     parser.add_argument("--fen", default=START_FEN, help="start from this position (FEN)")
+    parser.add_argument(
+        "--seed", type=int, help="replay the computer's choices exactly (same seed, same game)"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -59,11 +62,11 @@ def main(argv: list[str] | None = None) -> int:
         symbols = can_print_symbols()
         if not symbols and hasattr(sys.stdout, "reconfigure"):
             sys.stdout.reconfigure(errors="replace")  # print "?" rather than crash on "·" or "é"
-        play_in_terminal(opponent, human, args.fen, ascii_only=args.ascii or not symbols)
+        play_in_terminal(opponent, human, args.fen, ascii_only=args.ascii or not symbols, seed=args.seed)
     else:
         from .ui import play  # imported here, so `chess perft` and `chess terminal` don't need pygame
 
-        play(opponent, human, args.fen)
+        play(opponent, human, args.fen, args.seed)
     return 0
 
 

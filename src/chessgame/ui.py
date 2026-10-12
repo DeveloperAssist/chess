@@ -189,6 +189,7 @@ class App:
         settings_path: Path | None = SETTINGS_FILE,
         history_path: Path | None = HISTORY_FILE,
         analysis_levels: tuple[Level, Level] = (ANALYSIS, REPLY),
+        seed: int | None = None,  # the same seed plays the same game (for demos and videos)
     ) -> None:
         pygame.init()
         self.s = square_size or pick_square_size()
@@ -210,6 +211,7 @@ class App:
         self.reply_delay = reply_delay
         self.games_dir = games_dir or Path.cwd() / "games"
         self.levels = analysis_levels
+        self.seed = seed
         self.analyst = Analyst(threaded=threaded, levels=analysis_levels)
         self.history_path = history_path
         self.history = load_history(history_path) if history_path else []
@@ -578,11 +580,12 @@ class App:
         board = self.game.board.copy()
         seen = self.game.positions()
         level = self.opponent
+        seed = None if self.seed is None else self.seed * 1000 + len(self.game.moves)
         self.worker = worker
         self.analyst.allowed.clear()  # the analyst waits while the computer thinks
 
         def run() -> None:
-            result = choose_move(board, level, stop=worker.stop, seen=seen)
+            result = choose_move(board, level, stop=worker.stop, seen=seen, seed=seed)
             self.results.put((worker, result))
 
         if self.threaded:
@@ -1615,5 +1618,5 @@ def _next(options: list[str], current: str) -> str:
     return options[(options.index(current) + 1) % len(options)]
 
 
-def play(opponent: str = "medium", human: str = WHITE, fen: str = START_FEN) -> None:
-    App(opponent=opponent, human=human, fen=fen).run()
+def play(opponent: str = "medium", human: str = WHITE, fen: str = START_FEN, seed: int | None = None) -> None:
+    App(opponent=opponent, human=human, fen=fen, seed=seed).run()

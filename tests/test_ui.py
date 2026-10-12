@@ -177,6 +177,19 @@ def test_the_computer_opens_with_book_moves(make_app):
     assert get_book().is_book(Board(app.game.start_fen), app.game.moves[0])
 
 
+def test_the_same_seed_plays_the_same_game(make_app):
+    games = []
+    for _ in range(2):
+        app = make_app(opponent="easy", seed=11)
+        for start, end in (("e2", "e4"), ("g1", "f3"), ("f1", "c4"), ("d2", "d3")):
+            if square(start) in {m.start for m in app.game.legal_moves()}:
+                click_square(app, start)
+                click_square(app, end)
+                app.wait_for_computer()
+        games.append(app.game.sans)
+    assert games[0] == games[1] and len(games[0]) >= 6
+
+
 def test_undo_against_the_computer_takes_back_both_moves(make_app):
     app = make_app(opponent="easy")
     click_square(app, "e2")

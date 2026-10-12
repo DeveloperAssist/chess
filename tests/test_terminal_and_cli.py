@@ -109,6 +109,19 @@ def test_cli_refuses_a_bad_fen(capsys):
 )
 def test_cli_opens_the_window_with_the_right_options(monkeypatch, argv, expected):
     seen = []
-    monkeypatch.setattr("chessgame.ui.play", lambda opponent, human, fen: seen.append((opponent, human)))
+    monkeypatch.setattr(
+        "chessgame.ui.play", lambda opponent, human, fen, seed: seen.append((opponent, human))
+    )
     assert cli.main(argv) == 0
     assert seen == [expected]
+
+
+def test_the_same_seed_replays_the_same_game():
+    def computer_moves(seed):
+        out: list[str] = []
+        game = play_in_terminal(
+            "medium", read=scripted("e4", "Nf3", "Bc4", "quit"), write=out.append, review=False, seed=seed
+        )
+        return game.sans
+
+    assert computer_moves(7) == computer_moves(7)

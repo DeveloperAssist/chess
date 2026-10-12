@@ -69,6 +69,7 @@ def play_in_terminal(
     read: Callable[[str], str] = input,
     write: Callable[[str], None] = print,
     review: bool = True,
+    seed: int | None = None,
 ) -> Game:
     """The game loop. ``read`` and ``write`` can be swapped out, which is how the tests play."""
     game = Game(fen)
@@ -92,7 +93,8 @@ def play_in_terminal(
             show = False
         side = "White" if game.turn == WHITE else "Black"
         if vs_computer and game.turn != human:
-            result = choose_move(game.board, opponent, seen=game.positions())
+            ply_seed = None if seed is None else seed * 1000 + len(game.moves)
+            result = choose_move(game.board, opponent, seen=game.positions(), seed=ply_seed)
             text = game.play(result.move)
             thought = "book move" if result.book else f"{result.seconds:.1f} s"
             write(f"Computer ({side}) plays {text}  ({thought})")
