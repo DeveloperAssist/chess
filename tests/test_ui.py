@@ -402,8 +402,11 @@ def test_clicking_the_graph_jumps_to_that_move(make_app):
     play(app, "d4 d5 c4 e6 Nc3 Nf6")
     press(app, "Review")
     graph = app.layout.graph
-    click(app, (graph.right - 2, graph.centery))
-    assert app.review_ply == len(app.game.moves)
+    inner = graph.inflate(-round(app.s * 0.16), -round(app.s * 0.16))
+    click(app, (graph.right - 2, graph.centery))  # the last point: the position after the last move
+    assert app.review_ply == len(app.game.moves) - 1
+    click(app, (inner.x + inner.width * 3 / 6, graph.centery))  # the dot after move 3 shows move 3
+    assert app.review_ply == 2
     click(app, (graph.x + 1, graph.centery))
     assert app.review_ply == 0
 

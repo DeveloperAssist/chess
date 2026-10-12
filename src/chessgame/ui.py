@@ -745,8 +745,12 @@ class App:
                 return
         if self.reviewing:
             if self.layout.graph.collidepoint(pos) and self.game.moves:
-                share = (pos[0] - self.layout.graph.x) / max(1, self.layout.graph.width)
-                self.review_to(round(share * len(self.game.moves)))
+                # Point i of the curve is the position after move i, where a mistake's dot sits:
+                # clicking it shows that move (i - 1), with its arrows.
+                inner = self.layout.graph.inflate(-round(self.s * 0.16), -round(self.s * 0.16))
+                share = (pos[0] - inner.x) / max(1, inner.width)
+                point = round(max(0.0, min(1.0, share)) * len(self.game.moves))
+                self.review_to(max(0, point - 1))
             return
         sq = self.square_at(pos)
         if sq is None or not self.can_touch():
