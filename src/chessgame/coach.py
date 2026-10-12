@@ -25,14 +25,22 @@ def captured_piece(board: Board, move: Move) -> str | None:
     return None
 
 
-def reason(board: Board, move: Move, score: int | None = None, last_capture: int | None = None) -> str:
+def reason(
+    board: Board,
+    move: Move,
+    score: int | None = None,
+    last_capture: int | None = None,
+    last_taken: str | None = None,
+) -> str:
     """Why a move is good, in a few words ('develops a knight'), or '' if no simple rule fits.
 
-    ``last_capture`` is the square where the opponent just captured (if they did): taking back on
-    that square is a recapture, not a free piece. On a board with history, it's found by itself.
+    ``last_capture`` is the square where the opponent just captured (if they did), and
+    ``last_taken`` the kind of piece they took there. Taking back on that square is a recapture,
+    not a free piece. On a board with history, both are found by themselves.
     """
     if last_capture is None and board.history and board.history[-1].captured != EMPTY:
         last_capture = board.history[-1].move.end
+        last_taken = board.history[-1].captured.lower()
     piece = board.squares[move.start].lower()
     mover = board.turn
     them = other(mover)
@@ -54,6 +62,8 @@ def reason(board: Board, move: Move, score: int | None = None, last_capture: int
         return "castles the king to safety and brings a rook into play"
     if taken:
         if move.end == last_capture:
+            if last_taken and VALUES[taken] > VALUES[last_taken]:
+                return f"wins the {PIECES[taken]}, which just took your {PIECES[last_taken]}"
             return f"recaptures the {PIECES[taken]}"
         if safe_after:
             return f"wins the {PIECES[taken]} for free"
@@ -105,7 +115,11 @@ def explain(review: MoveReview) -> str:
     """One or two sentences about a graded move."""
     before = Board(review.fen_before)
     after = Board(review.fen_after)
-    best_why = reason(before, review.best, review.best_score, review.last_capture) if review.best else ""
+    best_why = (
+        reason(before, review.best, review.best_score, review.last_capture, review.last_taken)
+        if review.best
+        else ""
+    )
     better = f"{review.best_san} was better" + (f": it {best_why}." if best_why else ".")
     match review.kind:
         case "book":
@@ -113,7 +127,7 @@ def explain(review: MoveReview) -> str:
             named = f" ({opening.name})" if opening else ""
             return f"{review.san} is a book move{named}: a move masters play here."
         case "best":
-            why = reason(before, review.move, review.played_score, review.last_capture)
+            why = reason(before, review.move, review.played_score, review.last_capture, review.last_taken)
             return f"{review.san} is the best move" + (f": it {why}." if why else ".")
         case "excellent":
             return f"{review.san} is an excellent move, almost as good as {review.best_san}."

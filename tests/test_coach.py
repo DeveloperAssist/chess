@@ -44,6 +44,41 @@ def test_taking_back_in_a_trade_is_a_recapture_not_a_free_piece():
     assert review_of("e4 d5 exd5 Qxd5 Nc3 Qe5 Qe2 Qxe2 Bxe2", 8).last_capture == square("e2")
 
 
+def test_taking_back_more_than_was_taken_says_so():
+    board = Board()
+    for text in [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Bc5",
+        "O-O",
+        "d6",
+        "d3",
+        "Nf6",
+        "Bg5",
+        "h6",
+        "Bxf6",
+        "Qxf6",
+        "Nc3",
+        "Bg4",
+        "h3",
+        "Bxf3",
+        "Qxf3",
+        "Qxf3",
+    ]:
+        board.make(parse_move(board, text))
+    # Black's queen just took White's queen on f3: equal, so it's a recapture
+    assert reason(board, parse_move(board, "gxf3")) == "recaptures the queen"
+    board = Board("r1b1k2r/pppp1ppp/2n5/2b1p1q1/2B1P3/2NP1N2/PPP2PPP/R2QK2R w KQkq - 0 7")
+    fresh = Board(board.fen())
+    nxg5 = parse_move(fresh, "Nxg5")
+    assert reason(fresh, nxg5, last_capture=square("g5"), last_taken="b") == (
+        "wins the queen, which just took your bishop"
+    )
+
+
 def test_moving_out_of_danger():
     # The knight on c3 is attacked by a pawn; Ne2 takes it to safety.
     assert why("4k3/8/8/8/1p6/2N5/8/4K3 w - - 0 1", "c3e2") == "moves the knight out of danger"

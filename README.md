@@ -121,7 +121,7 @@ Your choice is remembered. You can also turn the coach off there, if you'd like 
 | **Text formats** | FEN (a position in one line), SAN (`Nf3`, `exd5`, `O-O`, `e8=Q+`) and PGN (a whole game). |
 | **pygame-ce** | Drawing, events, see-through layers, gradients, a glow effect, animation, charts. |
 | **Packaging and CLI** | `uv`, an entry point and `argparse` sub-commands: `chess`, `chess terminal`, `chess perft`. |
-| **Testing** | 368 pytest tests. They include perft, every opening line, the grading rules and window tests that run with no screen. |
+| **Testing** | 369 pytest tests. They include perft, every opening line, the grading rules and window tests that run with no screen. |
 
 ---
 
@@ -292,7 +292,7 @@ the review at the end is usually ready the moment the game ends.
 ## Tests
 
 ```bash
-uv run pytest            # 363 tests in about 30 seconds (no screen needed)
+uv run pytest            # 364 tests in about 30 seconds (no screen needed)
 uv run pytest -m slow    # 5 deeper perft counts
 uv run ruff check src tests
 ```
