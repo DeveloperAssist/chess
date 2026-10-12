@@ -1,0 +1,31 @@
+[project]
+name = "chessgame"
+version = "1.0.0"
+description = "Chess in Python: our own rules engine (perft-tested), a minimax computer player and a pygame-ce window (Developers Assist project)."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Developers Assist" }]
+license = "MIT"
+dependencies = ["pygame-ce>=2.5.8"]
+
+[project.scripts]
+chess = "chessgame.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=9.1.1", "ruff>=0.17.0"]
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -m 'not slow'"
+markers = ["slow: deeper perft counts (a few seconds each); run with `pytest -m slow`"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

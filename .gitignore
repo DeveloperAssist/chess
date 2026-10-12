@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+games/
+
+# internal notes for the owner (status, business decisions): kept local, not published
+SPEC.md
